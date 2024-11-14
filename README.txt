@@ -5,5 +5,5 @@ for the display sleeping and wakening make xorg.conf file with "Xorg :0 -configu
  Option "SuspendTime" "0"
  Option "OffTime" "0"
 
-https://suckless.org/
+ https://suckless.org/
 
