@@ -1,2 +1,0 @@
-# build
-dwm and suckless 
