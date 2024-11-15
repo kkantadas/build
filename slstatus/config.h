@@ -67,8 +67,9 @@ static const struct arg args[] = {
 	/* function format          argument */
   //{battery_perc, "%s%% ", "BAT0", NULL},
   /*{wifi_perc, " %s%% | ", "wlan0 ", NULL},*/
-  //{cpu_freq, " %s | ", NULL, NULL},
-  {datetime, "  %s", "%a %R;"},
+  /*{cpu_freq, " %s | ", NULL, NULL},*/
+  /*{datetime, "  %s", "%a %R;"},*/
+  {datetime, "  %s", "%a %R;"},
   {cat, " %s ", "/sys/class/net/eno1/operstate", NULL},
   {cpu_perc, " [  %s%% ", NULL, NULL},
   {ram_used, "  %s ]", "", NULL},
