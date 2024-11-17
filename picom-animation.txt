@@ -1,3 +1,2 @@
 
-
-https://github.com/yshui/picom
+https://github.com/ornfelt/picom-animations.git

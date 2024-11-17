@@ -9,6 +9,7 @@ $ git clone git://git.suckless.org/dwm ~/.local/src/dwm
 
 ---------------------------------------------------------
 picom
+https://github.com/ornfelt/picom-animations.git
 https://github.com/yshui/picom
 
 
