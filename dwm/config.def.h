@@ -4,7 +4,7 @@
 static const unsigned int borderpx  = 0;        /* border pixel of windows */
 static const unsigned int gappx     = 10;        /* gaps between windows */
 static const unsigned int snap      = 32;       /* snap pixel */
-static const int showbar            = 1;        /* 0 means no bar */
+static const int showbar            = 0;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const int vertpad            = 3;       /* vertical padding of bar */
 static const int sidepad            = 3;       /* horizontal padding of bar */
@@ -35,7 +35,7 @@ typedef struct {
 } Sp;
 
 const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
-const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "ranger", NULL };
+const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "lf", NULL };
 static Sp scratchpads[] = {
 	/* name          cmd  */
 	{"spterm",      spcmd1},
@@ -90,8 +90,10 @@ static const char *termcmd[]  = { "st", NULL };
 static const char *audiocmd[]  = { "pavucontrol", NULL };
 static const char *suspcmd[]  = { "systemctl", "suspend", NULL };
 static const char *powocmd[]  = { "systemctl", "poweroff", NULL };
+
+
 static const char *gammcmd[]  = { "pkill", "-USR1", "redshift", NULL };
-static const char *filecmd[]  = { "st", "-e", "ranger", NULL };
+static const char *filecmd[]  = { "st", "-e", "lf", NULL };
 
 #include "movestack.c"
 static const Key keys[] = {
