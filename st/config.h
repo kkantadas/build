@@ -7,7 +7,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
- static char *font = "monaco:pixelsize=18:antialias=true:autohint=true";
+ /*static char *font = "monaco:pixelsize=18:antialias=true:autohint=true";*/
+ static char *font = "CodeNewRoman Nerd Font:pixelsize=20:antialias=true:autohint=true";
 /* Spare fonts */
 static char *font2[] = {
   "JoyPixels:style=Regular:pixelsize=18:antialias=true:autohint=true",

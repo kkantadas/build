@@ -52,8 +52,6 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "pavucontrol",          NULL,       NULL,       0,            1,           -1 },
-	{ "virtualbox",           NULL,       NULL,       0,            1,           -1 },
-	{ "virt-manager",         NULL,       NULL,       0,            1,           -1 },
 	{ "Firefox",              NULL,       NULL,       1 << 8,       0,           -1 },
 	{ NULL,		               "spterm",		NULL,	    	SPTAG(0),		  1,		    	 -1 },
 	{ NULL,		               "spfm",		  NULL,	    	SPTAG(1),		  1,		    	 -1 },
