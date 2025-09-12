@@ -14,4 +14,5 @@ XLIBS =
 #XWAYLAND = -DXWAYLAND
 #XLIBS = xcb xcb-icccm
 
+CFLAGS += -Wno-deprecated-declarations
 CC = gcc

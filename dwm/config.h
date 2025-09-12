@@ -35,7 +35,7 @@ typedef struct {
 } Sp;
 
 const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
-const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "lf", NULL };
+const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "ranger", NULL };
 static Sp scratchpads[] = {
 	/* name          cmd  */
 	{"spterm",      spcmd1},
@@ -68,6 +68,8 @@ static const Layout layouts[] = {
 	{ "[]=",      tile },    /* first entry is default */
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
+	{ "TTT",      bstack },
+	{ "===",      bstackhoriz },
 };
 
 /* key definitions */
@@ -91,7 +93,8 @@ static const char *powocmd[]  = { "systemctl", "poweroff", NULL };
 
 
 static const char *gammcmd[]  = { "pkill", "-USR1", "redshift", NULL };
-static const char *filecmd[]  = { "st", "-e", "lf", NULL };
+static const char *filecmd[]  = { "st", "-e", "ranger", NULL };
+static const char *imagcmd[]  = { "scrot","-s", "-f", "/home/kk/.screenshots/screen_%Y-%m-%d_%H-%M.png", NULL };
 
 #include "movestack.c"
 static const Key keys[] = {
@@ -102,6 +105,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_z,      spawn,          {.v = suspcmd } },
 	{ MODKEY|ShiftMask|ControlMask, XK_p,      spawn,          {.v = powocmd } },
 	{ MODKEY|ShiftMask,             XK_g,      spawn,          {.v = gammcmd } },
+	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = imagcmd } },
 	{ MODKEY,                       XK_x,      spawn,          {.v = filecmd } },
 	{ 0,                            XK_Alt_L,  togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -118,6 +122,8 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
+	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[3]} },
+	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[4]} },
 	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
