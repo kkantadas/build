@@ -10,8 +10,8 @@ static const int vertpad            = 3;       /* vertical padding of bar */
 static const int sidepad            = 3;       /* horizontal padding of bar */
 static const int splitstatus        = 1;        /* 1 for split status items */
 static const char *splitdelim        = ";";       /* Character used for separating status */
-static const char *fonts[]          = { "monospace:size=14:style=bold" };
-static const char dmenufont[]       = "monospace:size=14:style=bold";
+static const char *fonts[]          = { "monospace:size=16:style=bold" };
+static const char dmenufont[]       = "monospace:size=16:style=bold";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -94,6 +94,7 @@ static const char *powocmd[]  = { "systemctl", "poweroff", NULL };
 
 static const char *gammcmd[]  = { "pkill", "-USR1", "redshift", NULL };
 static const char *filecmd[]  = { "st", "-e", "ranger", NULL };
+static const char *stature[]  = { "sh", "-c", "pkill slstatus; /usr/local/bin/slstatus &", NULL };
 static const char *imagcmd[]  = { "scrot","-s", "-f", "/home/kk/.screenshots/screen_%Y-%m-%d_%H-%M.png", NULL };
 
 #include "movestack.c"
@@ -107,6 +108,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_g,      spawn,          {.v = gammcmd } },
 	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = imagcmd } },
 	{ MODKEY,                       XK_x,      spawn,          {.v = filecmd } },
+	{ MODKEY,                       XK_e,      spawn,          {.v = stature } },
 	{ 0,                            XK_Alt_L,  togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
@@ -143,7 +145,7 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_e,      quit,           {0} },
+	{ MODKEY|ShiftMask,             XK_e,      quit,           {1} },
 	{ MODKEY,                       XK_minus, scratchpad_show, {0} },
 	{ MODKEY|ShiftMask,             XK_minus, scratchpad_hide, {0} },
 	{ MODKEY,                       XK_equal,scratchpad_remove,{0} },
