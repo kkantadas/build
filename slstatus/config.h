@@ -69,12 +69,14 @@ static const struct arg args[] = {
   /*{wifi_perc, " %s%% | ", "wlan0 ", NULL},*/
   /*{cpu_freq, " %s | ", NULL, NULL},*/
   /*{datetime, "  %s", "%a %R;"},*/
-  {datetime, "  %s", "%a %R;"},
   /*{cat, " %s ", "/sys/class/net/eno1/operstate", NULL},*/
-  {wifi_perc, " %s%% | ", "wlan0", NULL},
-  {cpu_perc, " [  %s%% ", NULL, NULL},
-  {ram_used, "  %s ]", "", NULL},
-  {temp, "  [  %s°C ] ", "/sys/class/thermal/thermal_zone0/temp" }
+  /*{wifi_perc, " %s%% | ", "wlan0", NULL},*/
+  /*{cat, " %s | ", "/sys/class/net/eno1/operstate" },*/
 
+  {datetime,    "  %s", "%a %R;"},
+  {run_command, " [ %s ]", "netstatus.sh" },
+  {cpu_perc,    " [  %s%% ", NULL},
+  {ram_used,    "  %s ]", NULL},
+  {temp,        " [  %s°C ] ", "/etc/hwmon-k10temp/temp1_input" }
 
 };
