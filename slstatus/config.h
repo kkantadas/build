@@ -77,6 +77,6 @@ static const struct arg args[] = {
   {run_command, " [ %s ]", "netstatus.sh" },
   {cpu_perc,    " [  %s%% ", NULL},
   {ram_used,    "  %s ]", NULL},
-  {temp,        " [  %s°C ] ", "/etc/hwmon-k10temp/temp1_input" }
+  {temp,        " [  %s°C ] ", "/sys/class/hwmon/hwmon2/temp1_input" }
 
 };
