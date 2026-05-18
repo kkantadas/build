@@ -97,6 +97,28 @@ static const char *filecmd[]  = { "st", "-e", "ranger", NULL };
 static const char *stature[]  = { "sh", "-c", "pkill slstatus; /usr/local/bin/slstatus &", NULL };
 static const char *imagcmd[]  = { "scrot","-s", "-f", "/home/kk/.screenshots/screen_%Y-%m-%d_%H-%M.png", NULL };
 
+void
+view_adjacent(const Arg *arg)
+{
+	int i, curtags;
+	int seltag = 0;
+	Arg a;
+
+	curtags = selmon->tagset[selmon->seltags];
+	for(i = 0; i < LENGTH(tags); i++)
+		if(curtags & (1 << i)){
+			seltag = i;
+			break;
+		}
+
+	seltag = (seltag + arg->i) % (int)LENGTH(tags);
+	if(seltag < 0)
+		seltag += LENGTH(tags);
+
+	a.i = (1 << seltag);
+	view(&a);
+}
+
 #include "movestack.c"
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -109,6 +131,8 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = imagcmd } },
 	{ MODKEY,                       XK_x,      spawn,          {.v = filecmd } },
 	{ MODKEY,                       XK_e,      spawn,          {.v = stature } },
+  { MODKEY,                       XK_Right,  view_adjacent,  { .i = +1 } },
+	{ MODKEY,                       XK_Left,   view_adjacent,  { .i = -1 } },
 	{ 0,                            XK_Alt_L,  togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
