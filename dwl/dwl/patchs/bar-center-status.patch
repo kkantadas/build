@@ -1,0 +1,146 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kk <kk@localhost>
+Date: Wed, 27 May 2026 18:15:00 +0530
+Subject: [PATCH] bar: center status text before first tab
+
+Split stdin status text on the first tab. Text before the tab is drawn
+centered in the bar, and text after the tab is drawn in the normal
+right-aligned status area.
+
+This lets a status script emit:
+
+    date-and-time<TAB>right-side-modules
+
+---
+ config.def.h |  1 +
+ dwl.c        | 41 ++++++++++++++++++++++++++++++++++++++---
+ 2 files changed, 39 insertions(+), 3 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+--- a/config.def.h
++++ b/config.def.h
+@@ -29,6 +29,7 @@ static uint32_t colors[][3]                = {
+ 	[SchemeNorm] = { 0xb0b0b0ff, 0x222222cc, 0x1c1f21ff },
+ 	[SchemeSel]  = { 0xffa500ff, 0x222222cc, 0x1c1f21ff },
+ 	[SchemeUrg]  = { 0xff5555ff, 0x222222cc, 0xff5555ff },
++	[SchemeBarBorder] = { 0x050505aa, 0x222222cc, 0 },
+ };
+ 
+ /* tagging */
+diff --git a/dwl.c b/dwl.c
+--- a/dwl.c
++++ b/dwl.c
+@@ -92,7 +92,7 @@
+ 
+ /* enums */
+-enum { SchemeNorm, SchemeSel, SchemeUrg }; /* color schemes */
++enum { SchemeNorm, SchemeSel, SchemeUrg, SchemeBarBorder }; /* color schemes */
+ enum { CurNormal, CurPressed, CurMove, CurResize }; /* cursor */
+ enum { XDGShell, LayerShell, X11 }; /* client types */
+ enum { LyrBg, LyrBottom, LyrTile, LyrFloat, LyrTop, LyrFS, LyrOverlay, LyrBlock, NUM_LAYERS }; /* scene layers */
+@@ -747,8 +747,10 @@
+ buttonpress(struct wl_listener *listener, void *data)
+ {
+ 	unsigned int i = 0, x = 0;
++	int sw;
+ 	double cx;
+ 	unsigned int click;
++	char status[sizeof(stext)], *right, *sep;
+ 	struct wlr_pointer_button_event *event = data;
+ 	struct wlr_keyboard *keyboard;
+ 	struct wlr_scene_node *node;
+@@ -776,6 +778,12 @@
+ 			(node = wlr_scene_node_at(&layers[LyrBottom]->node, cursor->x, cursor->y, NULL, NULL)) &&
+ 			(buffer = wlr_scene_buffer_from_node(node)) && buffer == selmon->scene_buffer) {
+ 			cx = (cursor->x - selmon->m.x) * selmon->wlr_output->scale;
++			strncpy(status, stext, sizeof(status) - 1);
++			status[sizeof(status) - 1] = '\0';
++			right = status;
++			if ((sep = strchr(status, '\t')))
++				right = sep + 1;
++			sw = TEXTW(selmon, right) - selmon->lrpad + 2;
+ 			do
+ 				x += TEXTW(selmon, tags[i]);
+ 			while (cx >= x && ++i < LENGTH(tags));
+@@ -784,7 +792,7 @@
+ 				arg.ui = 1 << i;
+ 			} else if (cx < x + TEXTW(selmon, selmon->ltsymbol))
+ 				click = ClkLtSymbol;
+-			else if (cx > selmon->b.width - (TEXTW(selmon, stext) - selmon->lrpad + 2)) {
++			else if (cx > selmon->b.width - sw) {
+ 				click = ClkStatus;
+ 			} else
+ 				click = ClkTitle;
+@@ -1571,10 +1579,11 @@
+ void
+ drawbar(Monitor *m)
+ {
+-	int x, w, tw = 0;
++	int x, w, tw = 0, tx = 0, cw = 0, cx = 0;
+ 	int boxs = m->drw->font->height / 9;
+ 	int boxw = m->drw->font->height / 6 + 2;
+ 	uint32_t i, occ = 0, urg = 0;
++	char status[sizeof(stext)], *center = NULL, *right, *sep;
+ 	Client *c;
+ 	Buffer *buf;
+ 
+@@ -1583,11 +1592,20 @@
+ 	if (!(buf = bufmon(m)))
+ 		return;
+ 
++	strncpy(status, stext, sizeof(status) - 1);
++	status[sizeof(status) - 1] = '\0';
++	right = status;
++	if ((sep = strchr(status, '\t'))) {
++		*sep = '\0';
++		center = status;
++		right = sep + 1;
++	}
++
+ 	/* draw status first so it can be overdrawn by tags later */
+ 	if (m == selmon) { /* status is only drawn on selected monitor */
+ 		drwl_setscheme(m->drw, colors[SchemeNorm]);
+-		tw = TEXTW(m, stext) - m->lrpad + 2; /* 2px right padding */
+-		drwl_text(m->drw, m->b.width - tw, 0, tw, m->b.height, 0, stext, 0);
++		tw = TEXTW(m, right) - m->lrpad + 2; /* 2px right padding */
++		drwl_text(m->drw, m->b.width - tw, 0, tw, m->b.height, 0, right, 0);
+ 	}
+ 
+ 	wl_list_for_each(c, &clients, link) {
+@@ -1612,6 +1630,7 @@
+ 	w = TEXTW(m, m->ltsymbol);
+ 	drwl_setscheme(m->drw, colors[SchemeNorm]);
+ 	x = drwl_text(m->drw, x, 0, w, m->b.height, m->lrpad / 2, m->ltsymbol, 0);
++	tx = x;
+ 
+ 	if ((w = m->b.width - tw - x) > m->b.height) {
+ 		if (c) {
+@@ -1625,6 +1644,18 @@
+ 		}
+ 	}
+ 
++	if (m == selmon && center && center[0]) {
++		cw = TEXTW(m, center);
++		cx = (m->b.width - (cw - m->lrpad)) / 2;
++		if (cx > tx && cx + cw < m->b.width - tw + m->lrpad) {
++			drwl_setscheme(m->drw, colors[SchemeNorm]);
++			drwl_text(m->drw, cx, 0, cw, m->b.height, m->lrpad / 2, center, 0);
++		}
++	}
++
++	drwl_setscheme(m->drw, colors[SchemeBarBorder]);
++	drwl_rect(m->drw, 0, m->b.height - 1, m->b.width, 1, 1, 0);
++
+	wlr_scene_buffer_set_dest_size(m->scene_buffer,
+		m->b.real_width, m->b.real_height);
+	wlr_scene_node_set_position(&m->scene_buffer->node, m->m.x,
+@@ -3359,7 +3381,7 @@ updatebar(Monitor *m)
+ 
+ 	m->b.scale = m->wlr_output->scale;
+ 	m->lrpad = m->drw->font->height;
+-	m->b.height = m->drw->font->height + 2;
++	m->b.height = m->drw->font->height + 8;
+ 	m->b.real_height = (int)((float)m->b.height / m->wlr_output->scale);
+ }
+-- 
+2.51.2
