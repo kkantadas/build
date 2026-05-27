@@ -1,0 +1,3 @@
+#!/bin/sh
+
+dwl-status.sh | dwl -s 'wbg -s "/home/kk/bin/wallpapers/river.png"'
