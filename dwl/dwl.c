@@ -346,6 +346,7 @@ static void movestack(const Arg *arg);
 static void motionabsolute(struct wl_listener *listener, void *data);
 static void motionnotify(uint32_t time, struct wlr_input_device *device, double sx,
 		double sy, double sx_unaccel, double sy_unaccel);
+static void overlaystack(Monitor *m);
 static void motionrelative(struct wl_listener *listener, void *data);
 static void moveresize(const Arg *arg);
 static int needsborder(Client *c);
@@ -1813,6 +1814,7 @@ focusstack(const Arg *arg)
 	}
 	/* If only one client is visible on selmon, then c == sel */
 	focusclient(c, 1);
+	arrange(selmon);
 }
 
 /* We probably should change the name of this: it sounds like it
@@ -2154,6 +2156,69 @@ monocle(Monitor *m)
 	}
 	if (n)
 		snprintf(m->ltsymbol, LENGTH(m->ltsymbol), "[%d]", n);
+	if ((c = focustop(m)))
+		wlr_scene_node_raise_to_top(&c->scene->node);
+}
+
+void
+overlaystack(Monitor *m)
+{
+	Client *c, *sel = focustop(m), *show = NULL;
+	unsigned int e = m->gaps, h, mw, my, r, ty;
+	int i, n = 0;
+
+	wl_list_for_each(c, &clients, link)
+		if (VISIBLEON(c, m) && !c->isfloating && !c->isfullscreen)
+			n++;
+	if (n == 0)
+		return;
+	if (smartgaps == n)
+		e = 0;
+	if (n > m->nmaster)
+		mw = m->nmaster ? (int)roundf((m->w.width + gappx*e) * m->mfact) : 0;
+	else
+		mw = m->w.width;
+
+	i = 0;
+	wl_list_for_each(c, &clients, link) {
+		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
+			continue;
+
+		if (i >= m->nmaster) {
+			if (c == sel) {
+				show = c;
+				break;
+			}
+			if (!show)
+				show = c;
+		}
+		i++;
+	}
+
+	i = 0;
+	my = ty = gappx*e;
+	wl_list_for_each(c, &clients, link) {
+		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
+			continue;
+
+		if (i < m->nmaster) {
+			wlr_scene_node_set_enabled(&c->scene->node, 1);
+			r = MIN(n, m->nmaster) - i;
+			h = (m->w.height - my - gappx*e - gappx*e * (r - 1)) / r;
+			resize(c, (struct wlr_box){.x = m->w.x + gappx*e, .y = m->w.y + my,
+				.width = mw - 2*gappx*e, .height = h}, 0);
+			my += c->geom.height + gappx*e;
+		} else {
+			wlr_scene_node_set_enabled(&c->scene->node, c == show);
+			if (c == show) {
+				h = m->w.height - ty - gappx*e;
+				resize(c, (struct wlr_box){.x = m->w.x + mw, .y = m->w.y + ty,
+					.width = m->w.width - mw - gappx*e, .height = h}, 0);
+			}
+		}
+		i++;
+	}
+
 	if ((c = focustop(m)))
 		wlr_scene_node_raise_to_top(&c->scene->node);
 }

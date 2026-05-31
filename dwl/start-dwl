@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec dbus-run-session dwl -s /home/kk/dwl/bar/dwl-startup
