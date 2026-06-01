@@ -1,0 +1,125 @@
+diff --git a/config.def.h b/config.def.h
+--- a/config.def.h
++++ b/config.def.h
+@@ -68,6 +68,7 @@ static const Layout layouts[] = {
+ 	{ "[]=",      tile },    /* first entry is default */
+ 	{ "><>",      NULL },    /* no layout function means floating behavior */
+ 	{ "[M]",      monocle },
++	{ "[O]",      overlaystack },
+ };
+ 
+ /* key definitions */
+@@ -146,6 +147,7 @@ static const Key keys[] = {
+ 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
+ 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
+ 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
++	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[3]} },
+ 	{ MODKEY,                       XK_space,  setlayout,      {0} },
+ 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+ 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
+diff --git a/config.h b/config.h
+--- a/config.h
++++ b/config.h
+@@ -68,8 +68,7 @@ static const Layout layouts[] = {
+ 	{ "[]=",      tile },    /* first entry is default */
+ 	{ "><>",      NULL },    /* no layout function means floating behavior */
+ 	{ "[M]",      monocle },
+-	{ "TTT",      bstack },
+-	{ "===",      bstackhoriz },
++	{ "[O]",      overlaystack },
+ };
+ 
+ /* key definitions */
+@@ -148,8 +147,7 @@ static const Key keys[] = {
+ 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
+ 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
+ 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
+-	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[3]} },
+-	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[4]} },
++	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[3]} },
+ 	{ MODKEY,                       XK_space,  setlayout,      {0} },
+ 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+ 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
+diff --git a/dwm.c b/dwm.c
+--- a/dwm.c
++++ b/dwm.c
+@@ -188,6 +188,7 @@ static void mappingnotify(XEvent *e);
+ static void maprequest(XEvent *e);
+ static void monocle(Monitor *m);
+ static void motionnotify(XEvent *e);
++static void overlaystack(Monitor *m);
+ static void movemouse(const Arg *arg);
+ static Client *nexttiled(Client *c);
+ static void pop(Client *c);
+@@ -918,6 +919,7 @@ focusstack(const Arg *arg)
+ 	}
+ 	if (c) {
+ 		focus(c);
++		arrange(selmon);
+ 		restack(selmon);
+ 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
+ 	}
+@@ -1203,6 +1205,63 @@ monocle(Monitor *m)
+ 		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+ }
+ 
++void
++overlaystack(Monitor *m)
++{
++	Client *c, *sel = m->sel, *show = NULL;
++	unsigned int i, n;
++	int h, mw, my, stackx, stackw;
++
++	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
++	if (n == 0)
++		return;
++
++	if (n > m->nmaster)
++		mw = m->nmaster ? m->ww * m->mfact : 0;
++	else
++		mw = m->ww;
++
++	stackx = m->wx + mw;
++	stackw = m->ww - mw;
++
++	i = 0;
++	for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
++		if (i >= m->nmaster) {
++			if (c == sel) {
++				show = c;
++				break;
++			}
++			if (!show)
++				show = c;
++		}
++		i++;
++	}
++
++	for (i = my = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
++		if (i < m->nmaster) {
++			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
++			resize(c, m->wx, m->wy + my,
++			       mw - (2 * c->bw) + (n > 1 ? gappx : 0),
++			       h - (2 * c->bw), 0);
++			if (my + HEIGHT(c) < m->wh)
++				my += HEIGHT(c);
++		} else if (c == show) {
++			resize(c, stackx, m->wy,
++			       stackw - (2 * c->bw),
++			       m->wh - (2 * c->bw), 0);
++		} else {
++			/*
++			 * Keep hidden stack clients mapped but offscreen. This lets focusstack()
++			 * focus one before arrange() promotes it into the visible stack frame.
++			 */
++			resize(c, stackx, m->wy,
++			       stackw - (2 * c->bw),
++			       m->wh - (2 * c->bw), 0);
++			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
++		}
++	}
++}
++
+ void
+ motionnotify(XEvent *e)
+ {

@@ -189,6 +189,7 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void monocle(Monitor *m);
 static void motionnotify(XEvent *e);
+static void overlaystack(Monitor *m);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void pop(Client *c);
@@ -250,8 +251,6 @@ static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xinitvisual();
 static void zoom(const Arg *arg);
-static void bstack(Monitor *m);
-static void bstackhoriz(Monitor *m);
 
 /* variables */
 static const char broken[] = "broken";
@@ -928,6 +927,7 @@ focusstack(const Arg *arg)
 	}
 	if (c) {
 		focus(c);
+		arrange(selmon);
 		restack(selmon);
 		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 	}
@@ -1197,6 +1197,63 @@ monocle(Monitor *m)
 		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
 		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+}
+
+void
+overlaystack(Monitor *m)
+{
+	Client *c, *sel = m->sel, *show = NULL;
+	unsigned int i, n;
+	int h, mw, my, stackx, stackw;
+
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	if (n == 0)
+		return;
+
+	if (n > m->nmaster)
+		mw = m->nmaster ? m->ww * m->mfact : 0;
+	else
+		mw = m->ww;
+
+	stackx = m->wx + mw;
+	stackw = m->ww - mw;
+
+	i = 0;
+	for (c = nexttiled(m->clients); c; c = nexttiled(c->next)) {
+		if (i >= m->nmaster) {
+			if (c == sel) {
+				show = c;
+				break;
+			}
+			if (!show)
+				show = c;
+		}
+		i++;
+	}
+
+	for (i = my = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+		if (i < m->nmaster) {
+			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
+			resize(c, m->wx, m->wy + my,
+			       mw - (2 * c->bw) + (n > 1 ? gappx : 0),
+			       h - (2 * c->bw), 0);
+			if (my + HEIGHT(c) < m->wh)
+				my += HEIGHT(c);
+		} else if (c == show) {
+			resize(c, stackx, m->wy,
+			       stackw - (2 * c->bw),
+			       m->wh - (2 * c->bw), 0);
+		} else {
+			/*
+			 * Keep hidden stack clients mapped but offscreen. This lets focusstack()
+			 * focus one before arrange() promotes it into the visible stack frame.
+			 */
+			resize(c, stackx, m->wy,
+			       stackw - (2 * c->bw),
+			       m->wh - (2 * c->bw), 0);
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		}
+	}
 }
 
 void
@@ -2598,66 +2655,4 @@ main(int argc, char *argv[])
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
-}
-
-static void
-bstack(Monitor *m) {
-	int w, h, mh, mx, tx, ty, tw;
-	unsigned int i, n;
-	Client *c;
-
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (n == 0)
-		return;
-	if (n > m->nmaster) {
-		mh = m->nmaster ? m->mfact * m->wh : 0;
-		tw = m->ww / (n - m->nmaster);
-		ty = m->wy + mh;
-	} else {
-		mh = m->wh;
-		tw = m->ww;
-		ty = m->wy;
-	}
-	for (i = mx = 0, tx = m->wx, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
-		if (i < m->nmaster) {
-			w = (m->ww - mx) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx + mx, m->wy, w - (2 * c->bw), mh - (2 * c->bw), 0);
-			mx += WIDTH(c);
-		} else {
-			h = m->wh - mh;
-			resize(c, tx, ty, tw - (2 * c->bw), h - (2 * c->bw), 0);
-			if (tw != m->ww)
-				tx += WIDTH(c);
-		}
-	}
-}
-
-static void
-bstackhoriz(Monitor *m) {
-	int w, mh, mx, tx, ty, th;
-	unsigned int i, n;
-	Client *c;
-
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (n == 0)
-		return;
-	if (n > m->nmaster) {
-		mh = m->nmaster ? m->mfact * m->wh : 0;
-		th = (m->wh - mh) / (n - m->nmaster);
-		ty = m->wy + mh;
-	} else {
-		th = mh = m->wh;
-		ty = m->wy;
-	}
-	for (i = mx = 0, tx = m->wx, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
-		if (i < m->nmaster) {
-			w = (m->ww - mx) / (MIN(n, m->nmaster) - i);
-			resize(c, m->wx + mx, m->wy, w - (2 * c->bw), mh - (2 * c->bw), 0);
-			mx += WIDTH(c);
-		} else {
-			resize(c, tx, ty, m->ww - (2 * c->bw), th - (2 * c->bw), 0);
-			if (th != m->wh)
-				ty += HEIGHT(c);
-		}
-	}
 }

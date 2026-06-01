@@ -43,7 +43,7 @@ static Sp scratchpads[] = {
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4"  };
+static const char *tags[] = { "1", "2", "3", };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -68,8 +68,7 @@ static const Layout layouts[] = {
 	{ "[]=",      tile },    /* first entry is default */
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
-	{ "TTT",      bstack },
-	{ "===",      bstackhoriz },
+	{ "[O]",      overlaystack },
 };
 
 /* key definitions */
@@ -131,25 +130,24 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = imagcmd } },
 	{ MODKEY,                       XK_x,      spawn,          {.v = filecmd } },
 	{ MODKEY,                       XK_e,      spawn,          {.v = stature } },
-  { MODKEY,                       XK_j,  view_adjacent,  { .i = +1 } },
-	{ MODKEY,                       XK_k,   view_adjacent,  { .i = -1 } },
+  { MODKEY,                       XK_Left,   view_adjacent,  { .i = +1 } },
+	{ MODKEY,                       XK_Right,  view_adjacent,  { .i = -1 } },
 	{ 0,                            XK_Alt_L,  togglebar,      {0} },
-	{ MODKEY,                       XK_Left,      focusstack,     {.i = +1 } },
-	{ MODKEY,                       XK_Right,      focusstack,     {.i = -1 } },
+	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
+	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_i,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY|ShiftMask,             XK_Left,      movestack,      {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_Right,      movestack,      {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_j,      movestack,      {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_k,      movestack,      {.i = -1 } },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[4]} },
+	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[3]} },
 	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
@@ -169,7 +167,7 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_7,                      6)
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
-	{ MODKEY|ShiftMask,             XK_e,      quit,           {1} },
+	{ MODKEY|ShiftMask,             XK_e,     quit,           {1} },
 	{ MODKEY,                       XK_minus, scratchpad_show, {0} },
 	{ MODKEY|ShiftMask,             XK_minus, scratchpad_hide, {0} },
 	{ MODKEY,                       XK_equal,scratchpad_remove,{0} },
