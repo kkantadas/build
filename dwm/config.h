@@ -52,7 +52,7 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "pavucontrol",          NULL,       NULL,       0,            1,           -1 },
-	{ "Firefox",              NULL,       NULL,       1 << 8,       0,           -1 },
+	{ "Firefox",              NULL,       NULL,       1 << 0,       0,           -1 },
 	{ NULL,		               "spterm",		NULL,	    	SPTAG(0),		  1,		    	 -1 },
 	{ NULL,		               "spfm",		  NULL,	    	SPTAG(1),		  1,		    	 -1 },
 };
@@ -161,12 +161,6 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_e,     quit,           {1} },
 	{ MODKEY,                       XK_minus, scratchpad_show, {0} },
 	{ MODKEY|ShiftMask,             XK_minus, scratchpad_hide, {0} },
