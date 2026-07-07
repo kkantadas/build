@@ -93,6 +93,7 @@ static const char *powocmd[]  = { "systemctl", "poweroff", NULL };
 
 static const char *gammcmd[]  = { "pkill", "-USR1", "redshift", NULL };
 static const char *filecmd[]  = { "st", "-e", "ranger", NULL };
+static const char *emacmd[]  =  { "emacsclient","-c", "-n", "-a", "", NULL };
 static const char *stature[]  = { "sh", "-c", "pkill slstatus; /usr/local/bin/slstatus &", NULL };
 static const char *imagcmd[]  = { "scrot","-s", "-f", "/home/kk/.screenshots/screen_%Y-%m-%d_%H-%M.png", NULL };
 
@@ -123,14 +124,15 @@ static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd } },
 	{ MODKEY,                       XK_a,      spawn,          {.v = audiocmd } },
+	{ MODKEY,                       XK_e,      spawn,          {.v = emacmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_z,      spawn,          {.v = suspcmd } },
 	{ MODKEY|ShiftMask|ControlMask, XK_p,      spawn,          {.v = powocmd } },
 	{ MODKEY|ShiftMask,             XK_g,      spawn,          {.v = gammcmd } },
 	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = imagcmd } },
 	{ MODKEY,                       XK_x,      spawn,          {.v = filecmd } },
-	{ MODKEY,                       XK_e,      spawn,          {.v = stature } },
-  { MODKEY,                       XK_Left,   view_adjacent,  { .i = +1 } },
+	{ MODKEY,                       XK_s,      spawn,          {.v = stature } },
+    { MODKEY,                       XK_Left,   view_adjacent,  { .i = +1 } },
 	{ MODKEY,                       XK_Right,  view_adjacent,  { .i = -1 } },
 	{ 0,                            XK_Alt_L,  togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
